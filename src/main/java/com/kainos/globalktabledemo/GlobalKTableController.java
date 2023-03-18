@@ -18,13 +18,13 @@ import static org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore;
 
 @RestController
 @RequiredArgsConstructor
-public class TestConfigurationController {
+public class GlobalKTableController {
 
     private final StreamsBuilderFactoryBean streamsBuilderFactoryBean;
 
 
-    @GetMapping("/configuration/{key}")
-    @Timed(value="testconfiguration.getconfiguration", description="Time to get configuration")
+    @GetMapping("/gktable/{key}")
+    @Timed(value="globalktablecontroller.getconfiguration", description="Time to get configuration from gktable")
     public ResponseEntity getConfiguration(@PathVariable final String key) {
         final KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();
         ReadOnlyKeyValueStore<String, CacheConfig> store = kafkaStreams.store(StoreQueryParameters.fromNameAndType(CONFIG_STORE, keyValueStore()));

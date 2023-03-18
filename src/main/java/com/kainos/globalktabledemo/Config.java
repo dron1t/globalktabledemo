@@ -15,6 +15,8 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
@@ -34,7 +36,6 @@ public class Config {
     public GlobalKTable<String, CacheConfig> buildConfiguration(StreamsBuilder builder) {
         Serde<String> keySerde = Serdes.String();
         Serde<CacheConfig> valueSerde = new JsonSerde<>(CacheConfig.class);
-        //valueSerde.configure(Map.of("spring.json.trusted.packages", "*", "spring.json.use.type.headers", false), false);
         return builder.globalTable(DEMO_CONFIG_NAME, Consumed.with(keySerde, valueSerde),
                 Materialized.<String, CacheConfig, KeyValueStore< Bytes, byte[]>>as(CONFIG_STORE)
                                 .withKeySerde(Serdes.String())
@@ -47,15 +48,29 @@ public class Config {
     class Producer {
 
         private final KafkaTemplate<String, CacheConfig> kafkaTemplate;
+        private final CacheConfigRepository cacheConfigRepository;
 
         @EventListener(ApplicationStartedEvent.class)
         public void produce() {
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("fieldOne", "fieldTwoTwo", 1));
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key2", new CacheConfig("otherKey", "fieldTwoThree", 2));
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("replacedKey", "fieldTwoThree", 2));
+            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("key1","fieldOne", "fieldTwoTwo", 1));
+            kafkaTemplate.send(DEMO_CONFIG_NAME, "key2", new CacheConfig("key2","otherKey", "fieldTwoThree", 2));
+            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("key1","replacedKey", "fieldTwoThree", 2));
+
+            cacheConfigRepository.save(new CacheConfig("key2","otherKey", "fieldTwoThree", 2));
+            cacheConfigRepository.save(new CacheConfig("key1","replacedKey", "fieldTwoThree", 2));
         }
     }
 
+    @Bean
+    JedisConnectionFactory jedisConnectionFactory() {
+        return new JedisConnectionFactory();
+    }
 
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(jedisConnectionFactory());
+        return template;
+    }
 
 }
