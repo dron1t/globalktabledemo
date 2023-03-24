@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Configuration
 public class Config {
 
-    public static final String DEMO_CONFIG_NAME = "demo-config-name";
+    public static final String CONFIG_TOPIC_NAME = "demo-config-name";
     public static final String CONFIG_STORE = "config-store";
 
     @Bean
@@ -36,8 +36,8 @@ public class Config {
     public GlobalKTable<String, CacheConfig> buildConfiguration(StreamsBuilder builder) {
         Serde<String> keySerde = Serdes.String();
         Serde<CacheConfig> valueSerde = new JsonSerde<>(CacheConfig.class);
-        return builder.globalTable(DEMO_CONFIG_NAME, Consumed.with(keySerde, valueSerde),
-                Materialized.<String, CacheConfig, KeyValueStore< Bytes, byte[]>>as(CONFIG_STORE)
+        return builder.globalTable(CONFIG_TOPIC_NAME, Consumed.with(keySerde, valueSerde),
+                Materialized.<String, CacheConfig, KeyValueStore<Bytes, byte[]>>as(CONFIG_STORE)
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(valueSerde)
                                         .withCachingEnabled());
@@ -52,9 +52,9 @@ public class Config {
 
         @EventListener(ApplicationStartedEvent.class)
         public void produce() {
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("key1","fieldOne", "fieldTwoTwo", 1));
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key2", new CacheConfig("key2","otherKey", "fieldTwoThree", 2));
-            kafkaTemplate.send(DEMO_CONFIG_NAME, "key1", new CacheConfig("key1","replacedKey", "fieldTwoThree", 2));
+            kafkaTemplate.send(CONFIG_TOPIC_NAME, "key1", new CacheConfig("key1","xxx", "fieldTwoTwo", 1));
+            kafkaTemplate.send(CONFIG_TOPIC_NAME, "key2", new CacheConfig("key2","otherKey", "fieldTwoThree", 2));
+            kafkaTemplate.send(CONFIG_TOPIC_NAME, "key1", new CacheConfig("key1","tech3talk", "fieldTwoThree", 2));
 
             cacheConfigRepository.save(new CacheConfig("key2","otherKey", "fieldTwoThree", 2));
             cacheConfigRepository.save(new CacheConfig("key1","replacedKey", "fieldTwoThree", 2));

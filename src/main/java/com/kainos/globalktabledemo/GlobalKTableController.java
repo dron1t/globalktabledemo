@@ -22,17 +22,13 @@ import static org.springframework.http.ResponseEntity.ok;
 public class GlobalKTableController {
 
     private final StreamsBuilderFactoryBean streamsBuilderFactoryBean;
-    private final LogTime logTime = new LogTime();
-
 
     @GetMapping("/gktable/{key}")
     @Timed(value = "globalktablecontroller.getconfiguration", description = "Time to get configuration from gktable")
     public ResponseEntity<CacheConfig> getConfiguration(@PathVariable final String key) {
-        var value = logTime.produceLogged(() -> {
-            final KafkaStreams kafkaStreams = logTime.produceLogged(() -> streamsBuilderFactoryBean.getKafkaStreams(), "getting kafka streams", log);
-            ReadOnlyKeyValueStore<String, CacheConfig> store = logTime.produceLogged(() -> kafkaStreams.store(StoreQueryParameters.fromNameAndType(CONFIG_STORE, keyValueStore())), "Getting store", log);
-            return logTime.produceLogged(() -> store.get(key), "getting value", log);
-        }, "whole operation", log);
+        var streams = streamsBuilderFactoryBean.getKafkaStreams();
+        ReadOnlyKeyValueStore<String, CacheConfig> store = streams.store(StoreQueryParameters.fromNameAndType(CONFIG_STORE, keyValueStore()));
+        var value = store.get(key);
         return ok().body(value);
     }
 }
