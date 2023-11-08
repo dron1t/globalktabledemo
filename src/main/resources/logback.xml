@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+            <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                <prettyPrint>true</prettyPrint>
+            </jsonFormatter>
+            <includeMDC>true</includeMDC>
+            <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
+            <appendLineSeparator>false</appendLineSeparator>
+        </layout>
+    </appender>
+    <appender name="CUSTOM" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+            <jsonFormatter class="com.lkedron.check.logs.CustomLogsAppender">
+                <prettyPrint>true</prettyPrint>
+            </jsonFormatter>
+            <includeMDC>true</includeMDC>
+            <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
+            <appendLineSeparator>false</appendLineSeparator>
+        </layout>
+    </appender>
+
+    <logger name="reactor.netty.http.client" level="INFO">
+        <appender-ref ref="CUSTOM" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

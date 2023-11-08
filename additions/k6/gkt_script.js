@@ -12,5 +12,5 @@ export const options = {
 }
 
 export default function () {
-    http.get('http://localhost:8080/redis/key1')
+    http.get('http://localhost:8080/gktable/key1')
 }
